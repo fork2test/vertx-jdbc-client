@@ -20,6 +20,7 @@ import io.vertx.core.*;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.TaskQueue;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.spi.metrics.PoolMetrics;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class JDBCConnectionImpl implements SQLConnection {
+class JDBCConnectionImpl implements SimpleSQLConnection {
 
   private static final Logger log = LoggerFactory.getLogger(JDBCConnectionImpl.class);
 
@@ -56,7 +57,7 @@ class JDBCConnectionImpl implements SQLConnection {
     this.metrics = metrics;
     this.metric = metric;
     this.rowStreamFetchSize = rowStreamFetchSize;
-    this.ctx = ((ContextInternal)context);
+    this.ctx = ((ContextInternal) context);
   }
 
   @Override
@@ -243,4 +244,23 @@ class JDBCConnectionImpl implements SQLConnection {
   public <C> C unwrap() {
     return (C) conn;
   }
+
+  @Override
+  public SimpleSQLConnection persist(String table, JsonObject params, Handler<AsyncResult<UpdateResult>> resultHandler) {
+    new JDBCPersist(vertx, helper, conn, ctx, statementsQueue, timeout, params, table).execute(resultHandler);
+    return this;
+  }
+
+  @Override
+  public SimpleSQLConnection merge(String table, JsonObject params, JsonObject key, Handler<AsyncResult<UpdateResult>> resultHandler) {
+    new JDBCMerge(vertx, helper, conn, ctx, statementsQueue, timeout, params, table, key);
+    return this;
+  }
+
+  @Override
+  public SimpleSQLConnection delete(String table, JsonObject key, Handler<AsyncResult<UpdateResult>> result) {
+    new JDBCDelete(vertx, helper, conn, ctx, statementsQueue, timeout, table, key);
+    return this;
+  }
+
 }
