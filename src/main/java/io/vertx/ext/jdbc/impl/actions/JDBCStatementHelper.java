@@ -58,6 +58,7 @@ public final class JDBCStatementHelper {
   private static final Logger log = LoggerFactory.getLogger(JDBCStatementHelper.class);
 
   private static final JsonArray EMPTY = new JsonArray(Collections.unmodifiableList(new ArrayList<>()));
+  private static final JsonObject EMPTY_OBJ = new JsonObject();
 
   private static final Pattern DATETIME = Pattern.compile("^\\d{4}-(?:0[0-9]|1[0-2])-[0-9]{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{3,9})?Z$");
   private static final Pattern DATE = Pattern.compile("^\\d{4}-(?:0[0-9]|1[0-2])-[0-9]{2}$");
@@ -92,6 +93,26 @@ public final class JDBCStatementHelper {
         statement.setObject(i + 1, null);
       }
     }
+  }
+
+  public void fillStatement(PreparedStatement statement, JsonObject in) throws SQLException {
+    if (in == null) {
+      in = EMPTY_OBJ;
+    }
+    int i = 0;
+    for (Object value : in.getMap().values()) {
+      if (value != null) {
+        if (value instanceof String) {
+          statement.setObject(i + 1, optimisticCast((String) value));
+        } else {
+          statement.setObject(i + 1, value);
+        }
+      } else {
+        statement.setObject(i + 1, null);
+      }
+      i++;
+    }
+
   }
 
   public void fillStatement(CallableStatement statement, JsonArray in, JsonArray out) throws SQLException {

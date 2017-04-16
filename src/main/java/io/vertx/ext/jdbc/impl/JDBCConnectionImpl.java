@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class JDBCConnectionImpl implements SimpleSQLConnection {
+class JDBCConnectionImpl implements SQLConnection {
 
   private static final Logger log = LoggerFactory.getLogger(JDBCConnectionImpl.class);
 
@@ -246,20 +246,20 @@ class JDBCConnectionImpl implements SimpleSQLConnection {
   }
 
   @Override
-  public SimpleSQLConnection persist(String table, JsonObject params, Handler<AsyncResult<UpdateResult>> resultHandler) {
+  public SQLConnection persist(String table, JsonObject params, Handler<AsyncResult<UpdateResult>> resultHandler) {
     new JDBCPersist(vertx, helper, conn, ctx, statementsQueue, timeout, params, table).execute(resultHandler);
     return this;
   }
 
   @Override
-  public SimpleSQLConnection merge(String table, JsonObject params, JsonObject key, Handler<AsyncResult<UpdateResult>> resultHandler) {
-    new JDBCMerge(vertx, helper, conn, ctx, statementsQueue, timeout, params, table, key);
+  public SQLConnection merge(String table, JsonObject params, JsonObject key, Handler<AsyncResult<UpdateResult>> resultHandler) {
+    new JDBCMerge(vertx, helper, conn, ctx, statementsQueue, timeout, params, table, key).execute(resultHandler);
     return this;
   }
 
   @Override
-  public SimpleSQLConnection delete(String table, JsonObject key, Handler<AsyncResult<UpdateResult>> result) {
-    new JDBCDelete(vertx, helper, conn, ctx, statementsQueue, timeout, table, key);
+  public SQLConnection delete(String table, JsonObject key, Handler<AsyncResult<UpdateResult>> resultHandler) {
+    new JDBCDelete(vertx, helper, conn, ctx, statementsQueue, timeout, table, key).execute(resultHandler);
     return this;
   }
 

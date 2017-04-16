@@ -94,6 +94,6 @@ DELETE FROM table_name WHERE some_column=some_value;
 
   @Override
   protected String name() {
-    return "insert";
+    return "delete";
   }
 }

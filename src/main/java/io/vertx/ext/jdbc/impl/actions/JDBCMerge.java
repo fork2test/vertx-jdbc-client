@@ -22,7 +22,7 @@ UPDATE table_name SET column1=value1,column2=value2,... WHERE some_column=some_v
   private final String table;
   private final JsonObject params;
   private final JsonObject key;
-  private final JsonArray in;
+  private final JsonObject in;
   private final int timeout;
   private String sql;
 
@@ -33,7 +33,7 @@ UPDATE table_name SET column1=value1,column2=value2,... WHERE some_column=some_v
     this.key = key;
     this.table = table;
     this.timeout = timeout;
-    this.in = new JsonArray();
+    this.in = new JsonObject();
     init();
   }
 
@@ -42,14 +42,14 @@ UPDATE table_name SET column1=value1,column2=value2,... WHERE some_column=some_v
     StringJoiner where = new StringJoiner(",", " WHERE ", " ");
     this.params.stream().forEach(
       coppia -> {
-        this.in.add(coppia.getValue());
+        in.put("p_" + coppia.getKey(), coppia.getValue());
         toSet.add(coppia.getKey());
       }
     );
     this.key.stream().forEach(
       coppia -> {
         where.add(coppia.getKey() + "=?");
-        in.add(coppia.getValue());
+        this.in.put("k_" + coppia.getKey(), coppia.getValue());
       }
     );
     this.sql = toSet.toString() + where.toString();
@@ -103,6 +103,6 @@ UPDATE table_name SET column1=value1,column2=value2,... WHERE some_column=some_v
 
   @Override
   protected String name() {
-    return "insert";
+    return "merge";
   }
 }
